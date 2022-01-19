@@ -15,9 +15,9 @@ dev_langs:
 
 `RelayCommand`和`RelayCommand<T>`有以下主要功能:  
 
--它们提供了`iccommand`接口的基本实现。  
--他们还实现了`IRelayCommand`(和`IRelayCommand<T>`)接口，它公开了一个`NotifyCanExecuteChanged`方法来引发`CanExecuteChanged`事件。  
--它们公开了接受`Action`和`Func<T>`等委托的构造函数，这允许包装标准方法和lambda表达式。  
+- 它们提供了`Iccommand`接口的基本实现。  
+- 他们还实现了`IRelayCommand`(和`IRelayCommand<T>`)接口，它公开了一个`NotifyCanExecuteChanged`方法来引发`CanExecuteChanged`事件。  
+- 它们公开了接受`Action`和`Func<T>`等委托的构造函数，这允许包装标准方法和lambda表达式。  
 
 ## Working with `ICommand`
 
@@ -64,7 +64,7 @@ And the relative UI could then be (using WinUI XAML):
 </Page>
 ```
 
-`Button`绑定到视图模型中的`iccommand`，它包装了私有的`IncrementCounter`方法。`TextBlock`显示`Counter`属性的值，并在每次属性值改变时更新
+`Button`绑定到视图模型中的`Iccommand`，它包装了私有的`IncrementCounter`方法。`TextBlock`显示`Counter`属性的值，并在每次属性值改变时更新
 
 ## 示例代码
 

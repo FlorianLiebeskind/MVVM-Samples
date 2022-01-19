@@ -17,7 +17,7 @@ dev_langs:
 
 -它提供了`INotifyPropertyChanged`和`INotifyPropertyChanging`的基本实现，暴露`PropertyChanged`和`PropertyChanging`事件。  
 -它提供了一系列的`SetProperty`方法，可以用来轻松地设置从`ObservableObject`继承的类型的属性值，并自动引发适当的事件。  
--它提供了`SetPropertyAndNotifyOnCompletion`方法，类似于' SetProperty '，但有能力设置' Task '属性，并在分配的任务完成时自动引发通知事件。  
+-它提供了`SetPropertyAndNotifyOnCompletion`方法，类似于`SetProperty`，但有能力设置`Task`属性，并在分配的任务完成时自动引发通知事件。  
 -它公开了`OnPropertyChanged`和`OnPropertyChanging`方法，它们可以在派生类型中被重写，以自定义通知事件如何被引发。
 
 ## Simple property

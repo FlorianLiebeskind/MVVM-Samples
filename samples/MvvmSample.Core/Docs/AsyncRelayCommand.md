@@ -9,7 +9,7 @@ dev_langs:
 
 # AsyncRelayCommand and AsyncRelayCommand&lt;T>
 
-The [`AsyncRelayCommand`](https://docs.microsoft.com/dotnet/api/microsoft.toolkit.mvvm.input.AsyncRelayCommand) and [`AsyncRelayCommand<T>`](https://docs.microsoft.com/dotnet/api/microsoft.toolkit.mvvm.input.AsyncRelayCommand-1) are `ICommand` implementations that extend the functionalities offered by `RelayCommand`, with support for asynchronous operations.
+[`AsyncRelayCommand`](https://docs.microsoft.com/dotnet/api/microsoft.toolkit.mvvm.input.AsyncRelayCommand) 和 [`AsyncRelayCommand<T>`](https://docs.microsoft.com/dotnet/api/microsoft.toolkit.mvvm.input.AsyncRelayCommand-1) 是 `ICommand` 的实现并拓展了 `RelayCommand` 的功能, 支持异步操作.
 
 ## How they work
 
