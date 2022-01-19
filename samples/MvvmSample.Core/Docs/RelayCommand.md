@@ -9,19 +9,19 @@ dev_langs:
 
 # RelayCommand
 
-The [`RelayCommand`](https://docs.microsoft.com/dotnet/api/microsoft.toolkit.mvvm.input.RelayCommand) and [`RelayCommand<T>`](https://docs.microsoft.com/dotnet/api/microsoft.toolkit.mvvm.input.RelayCommand-1) are `ICommand` implementations that can expose a method or delegate to the view. These types act as a way to bind commands between the viewmodel and UI elements.
+[`RelayCommand`](https://docs.microsoft.com/dotnet/api/microsoft.toolkit.mvvm.input.RelayCommand) 和 [`RelayCommand<T>`](https://docs.microsoft.com/dotnet/api/microsoft.toolkit.mvvm.input.RelayCommand-1) 是`ICommand`的实现，可以向视图公开方法或委托。这些类型作为视图模型和UI元素之间绑定命令的一种方式。 
 
 ## How they work
 
-`RelayCommand` and `RelayCommand<T>` have the following main features:
+`RelayCommand`和`RelayCommand<T>`有以下主要功能:  
 
-- They provide a base implementation of the `ICommand` interface.
-- They also implement the `IRelayCommand` (and `IRelayCommand<T>`) interface, which exposes a `NotifyCanExecuteChanged` method to raise the `CanExecuteChanged` event.
-- They expose constructors taking delegates like `Action` and `Func<T>`, which allow the wrapping of standard methods and lambda expressions.
+-它们提供了`iccommand`接口的基本实现。  
+-他们还实现了`IRelayCommand`(和`IRelayCommand<T>`)接口，它公开了一个`NotifyCanExecuteChanged`方法来引发`CanExecuteChanged`事件。  
+-它们公开了接受`Action`和`Func<T>`等委托的构造函数，这允许包装标准方法和lambda表达式。  
 
 ## Working with `ICommand`
 
-The following shows how to set up a simple command:
+下面展示了如何设置一个简单的命令:
 
 ```csharp
 public class MyViewModel : ObservableObject
@@ -64,11 +64,11 @@ And the relative UI could then be (using WinUI XAML):
 </Page>
 ```
 
-The `Button` binds to the `ICommand` in the viewmodel, which wraps the private `IncrementCounter` method. The `TextBlock` displays the value of the `Counter` property and is updated every time the property value changes.
+`Button`绑定到视图模型中的`iccommand`，它包装了私有的`IncrementCounter`方法。`TextBlock`显示`Counter`属性的值，并在每次属性值改变时更新
 
-## Sample Code
+## 示例代码
 
-There are more examples in the [unit tests](https://github.com/Microsoft/WindowsCommunityToolkit//blob/master/UnitTests/UnitTests.Shared/Mvvm).
+还有更多的例子 [unit tests](https://github.com/Microsoft/WindowsCommunityToolkit//blob/master/UnitTests/UnitTests.Shared/Mvvm).
 
 ## Requirements
 

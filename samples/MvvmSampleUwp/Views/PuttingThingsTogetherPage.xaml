@@ -21,8 +21,8 @@
 
     <ScrollViewer Padding="16" CanContentRenderOutsideBounds="True">
         <StackPanel Spacing="16">
-            <toolkit:MarkdownTextBlock Text="{x:Bind ViewModel.GetParagraph('Putting things together'), Mode=OneWay}"/>
-            <toolkit:MarkdownTextBlock Text="{x:Bind ViewModel.GetParagraph('What do we want to build'), Mode=OneWay}"/>
+            <toolkit:MarkdownTextBlock Text="{x:Bind ViewModel.GetParagraph('将东西集中放置'), Mode=OneWay}"/>
+            <toolkit:MarkdownTextBlock Text="{x:Bind ViewModel.GetParagraph('我们想建立什么'), Mode=OneWay}"/>
         </StackPanel>
     </ScrollViewer>
 </Page>

@@ -49,8 +49,8 @@
 &lt;/StackPanel>
                 </controls:InteractiveSample.XamlCode>
                 <controls:InteractiveSample.CSharpCode>
-// Simple viewmodel for a module responding to a request username message.
-// Don't forget to set the IsActive property to true when this viewmodel is in use!
+// 模块响应用户名消息请求的简单视图模型
+// 当这个视图模型被使用时，不要忘记将IsActive属性设置为true!  
 public class UserSenderViewModel : ObservableRecipient
 {
     public string Username { get; private set; } = "Bob";
@@ -69,19 +69,19 @@ public string Username
     private set => SetProperty(ref username, value);
 }
 
-// Sends a message to request the current username, and updates the property
+// 发送消息请求当前用户名，并更新属性
 public void RequestCurrentUsername()
 {
     Username = WeakReferenceMessenger.Default.Send&lt;CurrentUsernameRequestMessage>();
 }
 
-// Resets the current username
+// 重置当前用户名
 public void ResetCurrentUsername()
 {
     Username = null;
 }
 
-// A sample request message to get the current username
+// 获取当前用户名的示例请求消息  
 public sealed class CurrentUsernameRequestMessage : RequestMessage&lt;string>
 {
 }

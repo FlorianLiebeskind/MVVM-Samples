@@ -9,48 +9,47 @@ dev_langs:
 
 # ObservableRecipient
 
-The [`ObservableRecipient`](https://docs.microsoft.com/dotnet/api/microsoft.toolkit.mvvm.componentmodel.ObservableRecipient) type is a base class for observable objects that also acts as recipients for messages. This class is an extension of `ObservableObject` which also provides built-in support to use the `IMessenger` type.
-
+[`ObservableRecipient`](https://docs.microsoft.com/dotnet/api/microsoft.toolkit.mvvm.componentmodel.ObservableRecipient) 类型是`observable`对象的基类，它也充当消息的接收者。这个类是`ObservableObject`的扩展，`ObservableObject`也提供了内置的`IMessenger`类型的支持  
 ## How it works
 
-The `ObservableRecipient` type is meant to be used as a base for viewmodels that also use the `IMessenger` features, as it provides built-in support for it. In particular:
+`Observablerreceiver`类型是用来作为视图模型的基础，也使用·IMessenger`功能，因为它提供了内置的支持。 特别是:
 
-- It has both a parameterless constructor and one that takes an `IMessenger` instance, to be used with dependency injection. It also exposes a `Messenger` property that can be used to send and receive messages in the viewmodel. If the parameterless constructor is used, the `WeakReferenceMessenger.Default` instance will be assigned to the `Messenger` property.
-- It exposes an `IsActive` property to activate/deactivate the viewmodel. In this context, to "activate" means that a given viewmodel is marked as being in use, such that eg. it will start listening for registered messages, perform other setup operations, etc. There are two related methods, `OnActivated` and `OnDeactivated`, that are invoked when the property changes value. By default, `OnDeactivated` automatically unregisters the current instance from all registered messages. For best results and to avoid memory leaks, it's recommended to use `OnActivated` to register to messages, and to use `OnDeactivated` to do cleanup operations. This pattern allows a viewmodel to be enabled/disabled multiple times, while being safe to collect without the risk of memory leaks every time it's deactivated. By default, `OnActived` will automatically register all the message handlers defined through the `IRecipient<TMessage>` interface.
-- It exposes a `Broadcast<T>(T, T, string)` method which sends a `PropertyChangedMessage<T>` message through the `IMessenger` instance available from the `Messenger` property. This can be used to easily broadcast changes in the properties of a viewmodel without having to manually retrieve a `Messenger` instance to use. This method is used by the overload of the various `SetProperty` methods, which have an additional `bool broadcast` property to indicate whether or not to also send a message.
+-它有一个无参数构造函数和一个接受`IMessenger`实例的构造函数，用于依赖注入。 它还公开了一个`Messenger`属性，可以用来在视图模型中发送和接收消息。 如果使用无参数构造函数，则`WeakReferenceMessenger`。 默认的'实例将被分配给`Messenger`属性。  
+它暴露一个`IsActive`属性来激活/取消激活视图模型。 在这个上下文中，“激活”意味着一个给定的视图模型被标记为正在使用，例如。 它将开始侦听已注册的消息，执行其他设置操作，等等。 有两个相关的方法，`OnActivate`和`OnDeactivated`，当属性改变值时被调用。 默认情况下，`OnDeactivated`会自动从所有已注册的消息中注销当前实例。 为了获得最好的结果并避免内存泄漏，建议使用`OnActivated`来注册消息，并使用`OnDeactivated`来做清理操作。 该模式允许多次启用/禁用视图模型，同时可以安全地收集，而不会在每次禁用视图模型时出现内存泄漏的风险。 默认情况下，`OnActived`将自动注册所有通过`IRecipient<TMessage>`接口定义的消息处理程序。  
+-它暴露了一个`Broadcast<T>(T, T, string)`方法，该方法通过`Messenger`属性中的`IMessenger`实例发送一个`PropertyChangedMessage<T>`消息。 这可以用来轻松地广播视图模型属性的更改，而不需要手动检索`Messenger`实例来使用。 此方法由各种`SetProperty`方法的重载使用，这些方法有一个额外的`bool broadcast`属性来指示是否也发送消息
 
-Here's an example of a viewmodel that receives `LoggedInUserRequestMessage` messages when active:
+下面是一个视图模型的例子，它在活动时接收`LoggedInUserRequestMessage`消息:
 
 ```csharp
 public class MyViewModel : ObservableRecipient, IRecipient<LoggedInUserRequestMessage>
 {
     public void Receive(LoggedInUserRequestMessage message)
     {
-        // Handle the message here
+        // 处理这里的消息
     }
 }
 ```
 
-In the example above, `OnActivated` automatically registers the instance as a recipient for `LoggedInUserRequestMessage` messages, using that method as the action to invoke. Using the `IRecipient<TMessage>` interface is not mandatory, and the registration can also be done manually (even using just an inline lambda expression):
+在上面的例子中，`OnActivated`自动将实例注册为`LoggedInUserRequestMessage`消息的接收者，使用该方法作为要调用的动作。 使用`IRecipient<TMessage>`接口不是强制的，注册也可以手动完成(甚至只使用内联lambda表达式):
 
 ```csharp
 public class MyViewModel : ObservableRecipient
 {
     protected override void OnActivated()
     {
-        // Using a method group...
+        // 使用方法组…
         Messenger.Register<MyViewModel, LoggedInUserRequestMessage>(this, (r, m) => r.Receive(m));
 
-        // ...or a lambda expression
+        // ...或者lambda表达式
         Messenger.Register<MyViewModel, LoggedInUserRequestMessage>(this, (r, m) =>
         {
-            // Handle the message here
+            // 处理这里的消息
         });
     }
 
     private void Receive(LoggedInUserRequestMessage message)
     {
-        // Handle the message here
+        // 处理这里的消息
     }
 }
 ```

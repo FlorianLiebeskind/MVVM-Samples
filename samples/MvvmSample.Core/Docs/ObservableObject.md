@@ -9,20 +9,20 @@ dev_langs:
 
 # ObservableObject
 
-The [`ObservableObject`](https://docs.microsoft.com/dotnet/api/microsoft.toolkit.mvvm.componentmodel.ObservableObject) is a base class for objects that are observable by implementing the [`INotifyPropertyChanged`](https://docs.microsoft.com/dotnet/api/system.componentmodel.inotifypropertychanged) and [`INotifyPropertyChanging`](https://docs.microsoft.com/dotnet/api/system.componentmodel.inotifypropertychanging) interfaces. It can be used as a starting point for all kinds of objects that need to support property change notifications.
+[`ObservableObject`](https://docs.microsoft.com/dotnet/api/microsoft.toolkit.mvvm.componentmodel.ObservableObject) 是可通过实现 [`INotifyPropertyChanged`](https://docs.microsoft.com/dotnet/api/system.componentmodel.inotifypropertychanged) 和 [`INotifyPropertyChanging`](https://docs.microsoft.com/dotnet/api/system.componentmodel.inotifypropertychanging) 接口。它可以作为所有需要支持属性更改通知的对象的起点。
 
 ## How it works
 
-`ObservableObject` has the following main features:
+`ObservableObject` 具有以下主要特点:
 
-- It provides a base implementation for `INotifyPropertyChanged` and `INotifyPropertyChanging`, exposing the `PropertyChanged` and `PropertyChanging` events.
-- It provides a series of `SetProperty` methods that can be used to easily set property values from types inheriting from `ObservableObject`, and to automatically raise the appropriate events.
-- It provides the `SetPropertyAndNotifyOnCompletion` method, which is analogous to `SetProperty` but with the ability to set `Task` properties and raise the notification events automatically when the assigned tasks are completed.
-- It exposes the `OnPropertyChanged` and `OnPropertyChanging` methods, which can be overridden in derived types to customize how the notification events are raised.
+-它提供了`INotifyPropertyChanged`和`INotifyPropertyChanging`的基本实现，暴露`PropertyChanged`和`PropertyChanging`事件。  
+-它提供了一系列的`SetProperty`方法，可以用来轻松地设置从`ObservableObject`继承的类型的属性值，并自动引发适当的事件。  
+-它提供了`SetPropertyAndNotifyOnCompletion`方法，类似于' SetProperty '，但有能力设置' Task '属性，并在分配的任务完成时自动引发通知事件。  
+-它公开了`OnPropertyChanged`和`OnPropertyChanging`方法，它们可以在派生类型中被重写，以自定义通知事件如何被引发。
 
 ## Simple property
 
-Here's an example of how to implement notification support to a custom property:
+下面是如何实现对自定义属性的通知支持的示例:
 
 ```csharp
 public class User : ObservableObject
@@ -37,11 +37,11 @@ public class User : ObservableObject
 }
 ```
 
-The provided `SetProperty<T>(ref T, T, string)` method checks the current value of the property, and updates it if different, and then also raises the relevant events automatically. The property name is automatically captured through the use of the `[CallerMemberName]` attribute, so there's no need to manually specify which property is being updated.
+提供的`SetProperty<T>(ref T, T, string)`方法检查属性的当前值，如果不同就更新它，然后也会自动引发相关事件。 属性名是通过使用`[CallerMemberName]`属性自动捕获的，因此不需要手动指定要更新的属性。
 
 ## Wrapping a non-observable model
 
-A common scenario, for instance, when working with database items, is to create a wrapping "bindable" model that relays properties of the database model, and raises the property changed notifications when needed. This is also needed when wanting to inject notification support to models, that don't implement the `INotifyPropertyChanged` interface. `ObservableObject` provides a dedicated method to make this process simpler. For the following example, `User` is a model directly mapping a database table, without inheriting from `ObservableObject`:
+这也是需要的，当想要注入通知支持模型，不实现`INotifyPropertyChanged`接口。`ObservableObject`提供了一个专门的方法来简化这个过程。 下面的例子中，`User`是一个直接映射数据库表的模型，而不继承`ObservableObject`:
 
 ```csharp
 public class ObservableUser : ObservableObject
@@ -58,23 +58,23 @@ public class ObservableUser : ObservableObject
 }
 ```
 
-In this case we're using the `SetProperty<TModel, T>(T, T, TModel, Action<TModel, T>, string)` overload. The signature is slightly more complex than the previous one - this is necessary to let the code still be extremely efficient even if we don't have access to a backing field like in the previous scenario. We can go through each part of this method signature in detail to understand the role of the different components:
+在本例中，我们使用了`SetProperty<TModel, T>(T, T, TModel, Action<TModel, T>， string)`重载。 这个签名比前一个稍微复杂一些——这是必要的，即使我们不能像前一个场景那样访问后台字段，也要让代码仍然非常高效。 我们可以详细了解这个方法签名的每个部分，以了解不同组件的角色:  
 
-- `TModel` is a type argument, indicating the type of the model we're wrapping. In this case, it'll be our `User` class. Note that we don't need to specify this explicitly - the C# compiler will infer this automatically by how we're invoking the `SetProperty` method.
-- `T` is the type of the property we want to set. Similarly to `TModel`, this is inferred automatically.
-- `T oldValue` is the first parameter, and in this case we're using `user.Name` to pass the current value of that property we're wrapping.
-- `T newValue` is the new value to set to the property, and here we're passing `value`, which is the input value within the property setter.
-- `TModel model` is the target model we are wrapping, in this case we're passing the instance stored in the `user` field.
-- `Action<TModel, T> callback` is a function that will be invoked if the new value of the property is different than the current one, and the property needs to be set. This will be done by this callback function, which receives as input the target model and the new property value to set. In this case we're just assigning the input value (which we called `n`) to the `Name` property (by doing `u.Name = n`). It is important here to avoid capturing values from the current scope and only interact with the ones given as input to the callback, as this allows the C# compiler to cache the callback function and perform a number of performance improvements. It's because of this that we're not just directly accessing the `user` field here or the `value` parameter in the setter, but instead we're only using the input parameters for the lambda expression.
+- ` TModel `是一个类型参数，表示我们包装的模型的类型。 在本例中，它将是我们的` User `类。 请注意，我们不需要显式地指定这一点——c#编译器会通过我们如何调用` SetProperty `方法自动地推断出这一点。  
+- `T`是我们想要设置的属性的类型。 与` TModel `类似，这是自动推断的。  
+- ` T oldValue `是第一个参数，在这种情况下，我们使用` user. Name `来传递我们正在包装的属性的当前值。  
+- ` T newValue `是要设置到属性的新值，这里我们传递的是` value `，它是属性setter中的输入值。  
+- `TModel model`是我们包装的目标模型，在这种情况下，我们传递的实例存储在`user`字段。  
+- ` Action<TModel, T> callback `是一个函数，如果属性的新值与当前值不一致，需要对属性进行设置。 这将由这个回调函数完成，它将接收目标模型和要设置的新属性值作为输入。 在本例中，我们只是将输入值(我们称之为`n`)赋值给` Name `属性(通过执行`u.Name = n`)。 在这里，重要的是要避免从当前范围中获取值，并且只与作为回调函数输入的值交互，因为这允许c#编译器缓存回调函数并执行一些性能改进。 正因为如此，我们不只是直接访问这里的` user `字段或setter中的`value`参数，而是只使用lambda表达式的输入参数。  
 
-The `SetProperty<TModel, T>(T, T, TModel, Action<TModel, T>, string)` method makes creating these wrapping properties extremely simple, as it takes care of both retrieving and setting the target properties while providing an extremely compact API.
+`SetProperty<TModel, T>(T, T, TModel, Action<TModel, T>， string)`方法使得创建这些包装属性非常简单，因为它在提供一个非常紧凑的API的同时，处理了检索和设置目标属性。  
 
 > [!NOTE]
-> Compared to the implementation of this method using LINQ expressions, specifically through a parameter of type `Expression<Func<T>>` instead of the state and callback parameters, the performance improvements that can be achieved this way are really significant. In particular, this version is ~200x faster than the one using LINQ expressions, and does not make any memory allocations at all.
+> 与使用LINQ表达式实现这个方法相比，特别是通过一个类型为` Expression<Func<T>> `的参数，而不是状态和回调参数，通过这种方式可以实现的性能改进是非常显著的。 特别是，这个版本比使用LINQ表达式的版本快了大约200倍，而且根本不分配任何内存。  
 
 ## Handling `Task<T>` properties
 
-If a property is a `Task` it's necessary to also raise the notification event once the task completes, so that bindings are updated at the right time. eg. to display a loading indicator or other status info on the operation represented by the task. `ObservableObject` has an API for this scenario:
+如果一个属性是一个`Task`，那么在任务完成后也有必要触发通知事件，以便在正确的时间更新绑定。 如。 显示由任务所代表的操作的加载指示器或其他状态信息。 `ObservableObject`有一个用于这个场景的API:
 
 ```csharp
 public class MyModel : ObservableObject
@@ -94,10 +94,10 @@ public class MyModel : ObservableObject
 }
 ```
 
-Here the `SetPropertyAndNotifyOnCompletion<T>(ref TaskNotifier<T>, Task<T>, string)` method will take care of updating the target field, monitoring the new task, if present, and raising the notification event when that task completes. This way, it's possible to just bind to a task property and to be notified when its status changes. The `TaskNotifier<T>` is a special type exposed by `ObservableObject` that wraps a target `Task<T>` instance and enables the necessary notification logic for this method. The `TaskNotifier` type is also available to use directly if you have a general `Task` only.
+这里的`SetPropertyAndNotifyOnCompletion<T>(ref TaskNotifier<T>， Task<T>， string)`方法将负责更新目标字段，监视新任务，如果存在，并在任务完成时引发通知事件。 通过这种方式，可以只绑定到任务属性，并在其状态改变时收到通知。 `TaskNotifier<T>`是`ObservableObject`公开的一种特殊类型，它包装了一个目标`Task<T>`实例，并为该方法启用了必要的通知逻辑。 如果你只有一个通用的`Task`，`Tasktifier`类型也可以直接使用。
 
 > [!NOTE]
-> The `SetPropertyAndNotifyOnCompletion` method is meant to replace the usage of the `NotifyTaskCompletion<T>` type from the `Microsoft.Toolkit` package. If this type was being used, it can be replaced with just the inner `Task` (or `Task<TResult>`) property, and then the `SetPropertyAndNotifyOnCompletion` method can be used to set its value and raise notification changes. All the properties exposed by the `NotifyTaskCompletion<T>` type are available directly on `Task` instances.
+> `SetPropertyAndNotifyOnCompletion`方法是用来替换`Microsoft.Toolkit`包中的`NotifyTaskCompletion<T>`类型的使用。如果这个类型正在被使用，它可以被内部的`Task`(或`Task<TResult>`)属性代替，然后`SetPropertyAndNotifyOnCompletion`方法可以用来设置它的值并引发通知更改。 所有由`NotifyTaskCompletion<T>`类型公开的属性都可以直接在`Task`实例上使用。
 
 ## Sample Code
 

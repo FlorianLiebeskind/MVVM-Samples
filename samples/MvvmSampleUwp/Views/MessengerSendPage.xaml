@@ -72,7 +72,7 @@ public UserSenderViewModel SenderViewModel { get; } = new UserSenderViewModel();
 
 public UserReceiverViewModel ReceiverViewModel { get; } = new UserReceiverViewModel();
 
-// Simple viewmodel for a module sending a username message
+// 用于发送用户名消息的模块的简单视图模型  
 public class UserSenderViewModel : ObservableRecipient
 {
     private string username = "Bob";
@@ -91,7 +91,7 @@ public class UserSenderViewModel : ObservableRecipient
     }
 }
 
-// Simple viewmodel for a module receiving a username message
+// 接收用户名消息的模块的简单视图模型  
 public class UserReceiverViewModel : ObservableRecipient
 {
     private string username = "";
@@ -108,7 +108,7 @@ public class UserReceiverViewModel : ObservableRecipient
     }
 }
 
-// A sample message with a username value
+// 带有用户名值的示例消息
 public sealed class UsernameChangedMessage : ValueChangedMessage&lt;string>
 {
     public UsernameChangedMessage(string value) : base(value)

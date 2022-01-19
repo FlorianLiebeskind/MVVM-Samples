@@ -9,25 +9,26 @@ dev_langs:
 
 # Messenger
 
-The [`IMessenger`](https://docs.microsoft.com/dotnet/api/microsoft.toolkit.mvvm.Messaging.IMessenger) interface is a contract for types that can be used to exchange messages between different objects. This can be useful to decouple different modules of an application without having to keep strong references to types being referenced. It is also possible to send messages to specific channels, uniquely identified by a token, and to have different messengers in different sections of an application. The MVVM Toolkit provides two implementations out of the box: [`WeakReferenceMessenger`](https://docs.microsoft.com/dotnet/api/microsoft.toolkit.mvvm.Messaging.WeakReferenceMessenger) and [`StrongReferenceMessenger`](https://docs.microsoft.com/dotnet/api/microsoft.toolkit.mvvm.Messaging.StrongReferenceMessenger): the former uses weak references internally, offering automatic memory management for recipients, while the latter uses strong references and requires developers to manually unsubscribe their recipients when they're no longer needed (more details about how to unregister message handlers can be found below), but in exchange for that offers better performance and far less memory usage.
+[`IMessenger`](https://docs.microsoft.com/dotnet/api/microsoft.toolkit.mvvm.Messaging.IMessenger)接口是一种类型契约，可用于在不同对象之间交换消息。这对于解耦应用程序的不同模块很有用，而不必保持对被引用类型的强引用。 还可以将消息发送到由令牌唯一标识的特定通道，并在应用程序的不同部分中使用不同的信使。 MVVM工具包提供了开箱即用的两个实现:[`WeakReferenceMessenger`](https://docs.microsoft.com/dotnet/api/microsoft.toolkit.mvvm.Messaging.WeakReferenceMessenger)和[`StrongReferenceMessenger`](https://docs.microsoft.com/dotnet/api/microsoft.toolkit.mvvm.Messaging.StrongReferenceMessenger): 前者内部使用弱引用，为接收方提供自动内存管理，而后者使用强引用，并要求开发人员在不再需要接收方时手动取消订阅(关于如何取消消息处理程序的详细信息可以在下面找到)， 但作为交换，它提供了更好的性能和更少的内存使用
 
 ## How it works
 
-Types implementing `IMessenger` are responsible for maintaining links between recipients (receivers of messages) and their registered message types, with relative message handlers. Any object can be registered as a recipient for a given message type using a message handler, which will be invoked whenever the `IMessenger` instance is used to send a message of that type. It is also possible to send messages through specific communication channels (each identified by a unique token), so that multiple modules can exchange messages of the same type without causing conflicts. Messages sent without a token use the default shared channel.
+实现`IMessenger`的类型负责维护接收者(消息的接收者)与其注册的消息类型之间的链接，并使用相关的消息处理程序。 任何对象都可以使用消息处理程序注册为给定消息类型的接收者，每当使用`IMessenger`实例发送该类型的消息时，都会调用消息处理程序。 还可以通过特定的通信通道(每个通道由唯一的令牌标识)发送消息，这样多个模块可以交换相同类型的消息，而不会引起冲突。 不使用令牌发送的消息使用默认的共享通道。
 
-There are two ways to perform message registration: either through the `IRecipient<TMessage>` interface, or using a `MessageHandler<TRecipient, TMessage>` delegate acting as message handler. The first lets you register all the handlers with a single call to the `RegisterAll` extension, which automatically registers the recipients of all the declared message handlers, while the latter is useful when you need more flexibility or when you want to use a simple lambda expression as a message handler.
+有两种方法来执行消息注册:要么通过 `IRecipient<TMessage>` 接口，要么使用 `MessageHandler<TRecipient, TMessage>` 委托作为消息处理程序。 第一个让你注册的所有处理程序与单个调用 `RegisterAll` 扩展,自动注册的所有声明的消息处理程序,而后者是有用的,当你需要更大的灵活性或当你想要使用一个简单的lambda表达式作为消息处理程序。  
 
-Both `WeakReferenceMessenger` and `StrongReferenceMessenger` also expose a `Default` property that offers a thread-safe implementation built-in into the package. It is also possible to create multiple messenger instances if needed, for instance if a different one is injected with a DI service provider into a different module of the app (for instance, multiple windows running in the same process).
+`WeakReferenceMessenger` 和 `StrongReferenceMessenger` 都暴露了一个 `Default` 属性，该属性提供了一个内置在包中的线程安全实现。 如果需要，也可以创建多个messenger实例，例如，如果一个不同的实例通过DI服务提供商注入到应用程序的不同模块中(例如，多个窗口运行在同一个进程中)。  
 
 > [!NOTE]
-> Since the `WeakReferenceMessenger` type is simpler to use and matches the behavior of the messenger type from the `MvvmLight` library, it is the default type being used by the [`ObservableRecipient`](ObservableRecipient.md) type in the MVVM Toolkit. The `StrongReferenceType` can still be used, by passing an instance to the constructor of that class.
+> 因为 `WeakReferenceMessenger` 类型使用起来更简单，并且与 `MvvmLight` 库中的信使类型的行为相匹配，所以它是MVVM工具箱中的[`observablerreceiver`](observablerreceiver.md)类型所使用的默认类型。
+ `StrongReferenceType` 仍然可以被使用，通过将一个实例传递给该类的构造函数。
 
 ## Sending and receiving messages
 
-Consider the following:
+考虑以下:
 
 ```csharp
-// Create a message
+// 创建一个消息
 public class LoggedInUserChangedMessage : ValueChangedMessage<User>
 {
     public LoggedInUserChangedMessage(User user) : base(user)
@@ -35,101 +36,101 @@ public class LoggedInUserChangedMessage : ValueChangedMessage<User>
     }
 }
 
-// Register a message in some module
+// 在某个模块中注册消息
 WeakReferenceMessenger.Default.Register<LoggedInUserChangedMessage>(this, (r, m) =>
 {
-    // Handle the message here, with r being the recipient and m being the
-    // input messenger. Using the recipient passed as input makes it so that
-    // the lambda expression doesn't capture "this", improving performance.
+    //在这里处理消息，r是接收方，m是输入消息传递者。 
+    //使用接收方作为输入传递，
+    //这样lambda表达式就不会捕获“this”，从而提高了性能。  
 });
 
-// Send a message from some other module
+// 从其他模块发送消息
 WeakReferenceMessenger.Default.Send(new LoggedInUserChangedMessage(user));
 ```
 
-Let's imagine this message type being used in a simple messaging application, which displays a header with the user name and profile image of the currently logged user, a panel with a list of conversations, and another panel with messages from the current conversation, if one is selected. Let's say these three sections are supported by the `HeaderViewModel`, `ConversationsListViewModel` and `ConversationViewModel` types respectively. In this scenario, the `LoggedInUserChangedMessage` message might be sent by the `HeaderViewModel` after a login operation has completed, and both those other viewmodels might register handlers for it. For instance, `ConversationsListViewModel` will load the list of conversations for the new user, and `ConversationViewModel` will just close the current conversation, if one is present.
+让我们想象一下，在一个简单的消息传递应用程序中使用这种消息类型，该应用程序显示一个头(包含当前登录用户的用户名和个人资料图像)、一个包含对话列表的面板，以及一个包含来自当前对话的消息(如果选中了其中一个)的面板。 我们假设这三个部分分别由`HeaderViewModel `， `ConversationsListViewModel`和`ConversationViewModel`类型支持。 在这个场景中，`LoggedInUserChangedMessage`消息可能会在一个登录操作完成后由`HeaderViewModel`发送，并且这两个其他的视图模型可能会为它注册处理程序。 例如，`ConversationsListViewModel`将为新用户加载对话列表，而`ConversationViewModel`将关闭当前的对话，如果有的话。  
 
-The `IMessenger` instance takes care of delivering messages to all the registered recipients. Note that a recipient can subscribe to messages of a specific type. Note that inherited message types are not registered in the default `IMessenger` implementations provided by the MVVM Toolkit.
+`IMessenger`实例负责将消息传递给所有注册的收件人。 请注意，收件人可以订阅特定类型的消息。 请注意，MVVM工具包提供的默认`IMessenger`实现中不会注册继承的消息类型。  
 
-When a recipient is not needed anymore, you should unregister it so that it will stop receiving messages. You can unregister either by message type, by registration token, or by recipient:
+当不再需要收件人时，应注销该收件人，以便其停止接收消息。 您可以通过消息类型、注册令牌或接收方取消注册 :
 
 ```csharp
-// Unregisters the recipient from a message type
+// 从消息类型中注销接收方
 WeakReferenceMessenger.Default.Unregister<LoggedInUserChangedMessage>(this);
 
-// Unregisters the recipient from a message type in a specified channel
+// 从指定通道中的消息类型注销接收方
 WeakReferenceMessenger.Default.Unregister<LoggedInUserChangedMessage, int>(this, 42);
 
-// Unregister the recipient from all messages, across all channels
+// 在所有通道的所有消息中注销接收方  
 WeakReferenceMessenger.Default.UnregisterAll(this);
 ```
 
 > [!WARNING]
-> As mentioned before, this is not strictly necessary when using the `WeakReferenceMessenger` type, as it uses weak references to track recipients, meaning that unused recipients will still be eligible for garbage collection even though they still have active message handlers. It is still good practice to unsubscribe them though, to improve performances. On the other hand, the `StrongReferenceMessenger` implementation uses strong references to track the registered recipients. This is done for performance reasons, and it means that each registered recipient should manually be unregistered to avoid memory leaks. That is, as long as a recipient is registered, the `StrongReferenceMessenger` instance in use will keep an active reference to it, which will prevent the garbage collector from being able to collect that instance. You can either handle this manually, or you can inherit from `ObservableRecipient`, which by default automatically takes care of removing all the message registrations for recipient when it is deactivated (see docs on `ObservableRecipient` for more info about this).
+> 不过，取消订阅仍然是提高性能的好方法。 另一方面，`StrongReferenceMessenger`实现使用强引用来跟踪已注册的收件人。 这样做是出于性能考虑，这意味着每个注册的接收方都应该手动注销，以避免内存泄漏。 也就是说，只要一个接收方已经注册，正在使用的`StrongReferenceMessenger`实例就会保持对它的活动引用，这将阻止垃圾收集器收集该实例。 你可以手动处理这个，或者你可以继承`observablerreceiver`，默认情况下，当它被禁用时，它会自动为收件人删除所有的消息注册(有关此的更多信息，请参阅`observablerreceiver`的文档)。
 
-It is also possible to use the `IRecipient<TMessage>` interface to register message handlers. In this case, each recipient will need to implement the interface for a given message type, and provide a `Receive(TMessage)` method that will be invoke when receiving messages, like so:
+也可以使用`IRecipient<TMessage>`接口来注册消息处理程序。 在这种情况下，每个接收方都需要为给定的消息类型实现接口，并提供接收消息时将调用的`Receive(TMessage)`方法，如下所示:
 
 ```csharp
-// Create a message
+// 创建一个消息
 public class MyRecipient : IRecipient<LoggedInUserChangedMessage>
 {
     public void Receive(LoggedInUserChangedMessage message)
     {
-        // Handle the message here...   
+        // 处理这里的消息…
     }
 }
 
-// Register that specific message...
+// 注册特定的信息…
 WeakReferenceMessenger.Default.Register<LoggedInUserChangedMessage>(this);
 
-// ...or alternatively, register all declared handlers
+// ...或者，注册所有声明的处理程序 
 WeakReferenceMessenger.Default.RegisterAll(this);
 
-// Send a message from some other module
+// 从其他模块发送消息
 WeakReferenceMessenger.Default.Send(new LoggedInUserChangedMessage(user));
 ```
 
 ## Using request messages
 
-Another useful feature of messenger instances is that they can also be used to request values from a module to another. In order to do so, the package includes a base `RequestMessage<T>` class, which can be used like so:
+messenger实例的另一个有用特性是，它们还可以用于从一个模块向另一个模块请求值。 为了做到这一点，包包含一个基类`RequestMessage<T>`，可以这样使用:
 
 ```csharp
-// Create a message
+// 创建一个消息
 public class LoggedInUserRequestMessage : RequestMessage<User>
 {
 }
 
-// Register the receiver in a module
+// 在模块中注册接收器
 WeakReferenceMessenger.Default.Register<MyViewModel, LoggedInUserRequestMessage>(this, (r, m) =>
 {
-    // Assume that "CurrentUser" is a private member in our viewmodel.
-    // As before, we're accessing it through the recipient passed as
-    // input to the handler, to avoid capturing "this" in the delegate.
+    //假设“CurrentUser”是视图模型中的一个私有成员。 
+    //和前面一样，我们通过作为输入传递给处理程序的接收者来访问它，
+    //以避免在委托中捕获“this”。    
     m.Reply(r.CurrentUser);
 });
 
-// Request the value from another module
+// 从另一个模块请求该值
 User user = WeakReferenceMessenger.Default.Send<LoggedInUserRequestMessage>();
 ```
 
-The `RequestMessage<T>` class includes an implicit converter that makes the conversion from a `LoggedInUserRequestMessage` to its contained `User` object possible. This will also check that a response has been received for the message, and throw an exception if that's not the case. It is also possible to send request messages without this mandatory response guarantee: just store the returned message in a local variable, and then manually check whether a response value is available or not. Doing so will not trigger the automatic exception if a response is not received when the `Send` method returns.
+`RequestMessage<T>`类包含了一个隐式转换器，它可以实现从`LoggedInUserRequestMessage`到包含的`User`对象的转换。 这还将检查是否收到了消息的响应，如果没有收到，则抛出异常。 也可以在没有强制响应保证的情况下发送请求消息:只将返回的消息存储在一个本地变量中，然后手动检查响应值是否可用。 如果`Send`方法返回时没有收到响应，那么这样做不会触发自动异常。  
 
-The same namespace also includes base requests message for other scenarios: `AsyncRequestMessage<T>`, `CollectionRequestMessage<T>` and `AsyncCollectionRequestMessage<T>`.
-Here's how you can use an async request message:
+相同的命名空间还包括用于其他场景的基本请求消息:`AsyncRequestMessage<T>`，`CollectionRequestMessage<T>`和`AsyncCollectionRequestMessage<T>`。  
+下面介绍如何使用异步请求消息:
 
 ```csharp
-// Create a message
+// 创建一个消息
 public class LoggedInUserRequestMessage : AsyncRequestMessage<User>
 {
 }
 
-// Register the receiver in a module
+// 在模块中注册接收器
 WeakReferenceMessenger.Default.Register<MyViewModel, LoggedInUserRequestMessage>(this, (r, m) =>
 {
-    m.Reply(r.GetCurrentUserAsync()); // We're replying with a Task<User>
+    m.Reply(r.GetCurrentUserAsync()); // 我们用一个Task<User>来回复
 });
 
-// Request the value from another module (we can directly await on the request)
+// 从另一个模块请求值(我们可以直接等待请求)  
 User user = await WeakReferenceMessenger.Default.Send<LoggedInUserRequestMessage>();
 ```
 

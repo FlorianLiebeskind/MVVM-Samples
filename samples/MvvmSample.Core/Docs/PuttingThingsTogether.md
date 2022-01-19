@@ -7,24 +7,24 @@ dev_langs:
   - csharp
 ---
 
-# Putting things together
+# 将东西集中放置
 
-Now that we've outline all the different components that are available through the `Microsoft.Toolkit.Mvvm` package, we can look at a practical example of them all coming together to build a single, larger example. In this case, we want to build a very simple and minimalistic Reddit browser for a select number of subreddits.
+现在我们已经概述了通过`Microsoft.Toolkit.Mvvm`包提供的所有不同的组件，我们可以看一个实际的例子，它们都在一起构建一个更大的例子。在这个例子中，我们想为选定的一些子Reddit建立一个非常简单简约的Reddit浏览器。
 
-## What do we want to build
+## 我们想建立什么
 
-Let's start by outlining exactly what we want to build:
+让我们首先概述一下我们想要建立的具体内容:
 
-- A minimal Reddit browser made up of two "widgets": one showing posts from a subreddit, and the other one showing the currently selected post. The two widget need to be self contained and without strong references to one another.
-- We want users to be able to select a subreddit from a list of available options, and we want to save the selected subreddit as a setting and load it up the next time the sample is loaded.
-- We want the subreddit widget to also offer a refresh button to reload the current subreddit.
-- For the purposes of this sample, we don't need to be able to handle all the possible post types. We'll just assign a sample text to all loaded posts and display that directly, to make things simpler.
+- 一个最小的Reddit浏览器由两个 "widget "组成：一个显示子reddit的帖子，另一个显示当前选择的帖子。这两个widget需要自成一体，彼此之间没有强烈的引用。
+- 我们希望用户能够从一个可用的选项列表中选择一个子Reddit，我们希望将所选的子红点保存为一个设置，并在下次加载样本时加载它。
+- 我们希望subreddit小部件也提供一个刷新按钮来重新加载当前的子reddit。
+- 出于本示例的目的，我们不需要能够处理所有可能的post类型。 我们将为所有加载的文章分配一个示例文本，并直接显示它，使事情更简单。
 
-## Setting up the viewmodels
+## 设置视图模型
 
-Let's start with the viewmodel that will power the subreddit widget and let's go over the tools we need:
+让我们从支持subreddit小部件的视图模型开始，让我们来看看我们需要的工具:
 
-- **Commands:** we need the view to be able to request the viewmodel to reload the current list of posts from the selected subreddit. We can use the `AsyncRelayCommand` type to wrap a private method that will fetch the posts from Reddit. Here we're exposing the command through the `IAsyncRelayCommand` interface, to avoid strong references to the exact command type we're using. This will also allow us to potentially change the command type in the future without having to worry about any UI component relying on that specific type being used.
+- **Commands:** 我们需要视图能够请求视图模型重新加载当前列表的文章从选定的子reddit。 我们可以使用`AsyncRelayCommand`类型来包装一个私有方法，该方法将从Reddit获取帖子。 这里，我们通过`IAsyncRelayCommand`接口公开该命令，以避免对我们正在使用的确切命令类型的强引用。 这也将允许我们在将来更改命令类型，而不必担心任何UI组件依赖于所使用的特定类型。
 - **Properties:** we need to expose a number of values to the UI, which we can do with either observable properties if they're values we intend to completely replace, or with properties that are themselves observable (eg. `ObservableCollection<T>`). In this case, we have:
   - `ObservableCollection<object> Posts`, which is the observable list of loaded posts. Here we're just using `object` as a placeholder, as we haven't created a model to represent posts yet. We can replace this later on.
   - `IReadOnlyList<string> Subreddits`, which is a readonly list with the names of the subreddits that we allow users to choose from. This property is never updated, so it doesn't need to be observable either.
@@ -153,46 +153,46 @@ public sealed class PostWidgetViewModel : ObservableRecipient
 
 We now have a draft of our viewmodels ready, and we can start looking into the services we need.
 
-## Building the settings service
+## 构建设置服务
 
 > [!NOTE]
-> The sample is built using the dependency injection pattern, which is a commonly used approach to deal with services in viewmodels. It is also possible to use other patterns, such as the service locator pattern, but the MVVM Toolkit does not offer built-in APIs to enable that.
+> 该示例使用依赖注入模式构建，这是处理视图模型中的服务的常用方法。 也可以使用其他模式，比如服务定位器模式，但是MVVM Toolkit没有提供内置的api来支持这一点。  
 
-Since we want some of our properties to be saved and persisted, we need a way for viewmodels to be able to interact with the application settings. We shouldn't use platform-specific APIs directly in our viewmodels though, as that would prevent us from having all our viewmodels in a portable, .NET Standard project. We can solve this issue by using services, and the APIs in the `Microsoft.Extensions.DependencyInjection` library to setup our `IServiceProvider` instance for the application. The idea is to write interfaces that represent all the API surface that we need, and then to implement platform-specific types implementing this interface on all our application targets. The viewmodels will only interact with the interfaces, so they will not have any strong reference to any platform-specific type at all.
+因为我们想要保存和持久化一些属性，所以我们需要一种方法让视图模型能够与应用程序设置交互。 我们不应该在视图模型中直接使用特定于平台的api，因为那样会妨碍我们将所有的视图模型都放在一个可移植的。net标准项目中。 我们可以通过使用服务和`Microsoft.Extensions`中的api来解决这个问题。 依赖注入'库来设置应用程序的`IServiceProvider`实例。 其思想是编写表示我们需要的所有API表面的接口，然后实现特定于平台的类型，在所有应用程序目标上实现这个接口。 视图模型将只与接口交互，因此它们根本不会对任何特定于平台的类型有任何强引用。
 
-Here's a simple interface for a settings service:
+下面是设置服务的一个简单接口:
 
 ```csharp
 public interface ISettingsService
 {
     /// <summary>
-    /// Assigns a value to a settings key.
+    /// 为键设置值.
     /// </summary>
-    /// <typeparam name="T">The type of the object bound to the key.</typeparam>
-    /// <param name="key">The key to check.</param>
-    /// <param name="value">The value to assign to the setting key.</param>
+    /// <typeparam name="T">绑定到键的对象的类型.</typeparam>
+    /// <param name="key">检查的Key</param>
+    /// <param name="value">要分配给设置键的值</param>
     void SetValue<T>(string key, T value);
 
     /// <summary>
-    /// Reads a value from the current <see cref="IServiceProvider"/> instance and returns its casting in the right type.
+    /// 从当前的 <see cref="IServiceProvider"/> 实例中读取一个值，并返回正确类型的类型转换
     /// </summary>
-    /// <typeparam name="T">The type of the object to retrieve.</typeparam>
-    /// <param name="key">The key associated to the requested object.</param>
+    /// <typeparam name="T">要检索的对象的类型</typeparam>
+    /// <param name="key">与请求对象相关联的键</param>
     [Pure]
     T GetValue<T>(string key);
 }
 ```
 
-We can assume that platform-specific types implementing this interface will take care of dealing with all the logic necessary to actually serialize the settings, store them to disk and then read them back. We can now use this service in our `SubredditWidgetViewModel`, in order to make the `SelectedSubreddit` property persistent:
+我们可以假设，实现这个接口的平台特定类型将处理所有必要的逻辑，以实际序列化设置，存储它们到磁盘，然后读取它们。 我们现在可以在我们的`SubredditWidgetViewModel`中使用这个服务，以使`SelectedSubreddit`属性持久化到被请求的对象:
 
 ```csharp
 /// <summary>
-/// Gets the <see cref="ISettingsService"/> instance to use.
+/// 获取要使用的 <see cref="ISettingsService"/> 实例.
 /// </summary>
 private readonly ISettingsService SettingsService;
 
 /// <summary>
-/// Creates a new <see cref="SubredditWidgetViewModel"/> instance.
+/// 创建一个新的 <see cref="SubredditWidgetViewModel"/> 实例.
 /// </summary>
 public SubredditWidgetViewModel(ISettingsService settingsService)
 {
@@ -204,7 +204,7 @@ public SubredditWidgetViewModel(ISettingsService settingsService)
 private string selectedSubreddit;
 
 /// <summary>
-/// Gets or sets the currently selected subreddit.
+/// 获取或设置当前选定的子reddit
 /// </summary>
 public string SelectedSubreddit
 {
@@ -218,15 +218,15 @@ public string SelectedSubreddit
 }
 ```
 
-Here we're using dependency injection and constructor injection, as mentioned above. We've declared an `ISettingsService SettingsService` field that just stores our settings service (which we're receiving as parameter in the viewmodel constructor), and then we're initializing the `SelectedSubreddit` property in the constructor, by either using the previous value or just the first available subreddit. Then we also modified the `SelectedSubreddit` setter, so that it will also use the settings service to save the new value to disk.
+这里我们使用依赖注入和构造函数注入，如上所述。 我们已经声明了一个`ISettingsService SettingsService`字段，它只是存储了我们的设置服务(我们在viewmodel构造函数中接收的参数)，然后我们在构造函数中初始化`SelectedSubreddit`属性，通过使用之前的值或只是第一个可用的subreddit。 然后，我们还修改了`SelectedSubreddit ` setter，以便它也将使用设置服务将新值保存到磁盘.
 
-Great! Now we just need to write a platform specific version of this service, this time directly inside one of our app projects. Here's what that service might look like on UWP:
+太棒了! 现在我们只需要编写这个服务的平台特定版本，这一次直接在我们的一个应用程序项目中。 下面是该服务在UWP上的样子:
 
 ```csharp
 public sealed class SettingsService : ISettingsService
 {
     /// <summary>
-    /// The <see cref="IPropertySet"/> with the settings targeted by the current instance.
+    /// <see cref="IPropertySet"/> 针对当前实例的设置.
     /// </summary>
     private readonly IPropertySet SettingsStorage = ApplicationData.Current.LocalSettings.Values;
 
@@ -250,16 +250,16 @@ public sealed class SettingsService : ISettingsService
 }
 ```
 
-The final piece of the puzzle is to inject this platform-specific service into our service provider instance. We can do this at startup, like so:
+这个难题的最后一部分是将这个平台特定的服务注入到我们的服务提供者实例中。我们可以在创业时这样做:
 
 ```csharp
 /// <summary>
-/// Gets the <see cref="IServiceProvider"/> instance to resolve application services.
+/// 获取解析应用程序服务的<see cref="IServiceProvider"/>实例
 /// </summary>
 public IServiceProvider Services { get; }
 
 /// <summary>
-/// Configures the services for the application.
+/// 为应用程序配置服务
 /// </summary>
 private static IServiceProvider ConfigureServices()
 {
@@ -272,9 +272,9 @@ private static IServiceProvider ConfigureServices()
 }
 ```
 
-This will register a singleton instance of our `SettingsService` as a type implementing `ISettingsService`. We are also registering the `PostWidgetViewModel` as a transient service, meaning every time we retrieve an instance, it will be a new one (you can imagine this being useful if wanted to have multiple, independent post widgets). This means that every time we resolve an `ISettingsService` instance while the app in use is the UWP one, it will receive a `SettingsService` instance, which will use the UWP APIs behind the scene to manipulate settings. Perfect!
+这将注册我们的`SettingsService`的一个单例实例作为实现`ISettingsService`的类型。 我们还将`PostWidgetViewModel`注册为一个临时服务，这意味着每次我们检索一个实例时，它都将是一个新实例(你可以想象，如果想要有多个独立的post widget，这是很有用的)。 这意味着每次我们解析`ISettingsService`实例时，当使用中的应用程序是UWP实例时，它将接收到一个`SettingsService`实例，该实例将使用UWP api在后台操作设置。 完美!  
 
-## Building the Reddit service
+## 构建Reddit服务
 
 The last component of the backend that we're missing is a service that is able to use the Reddit REST APIs to fetch the posts from the subreddits we're interested in. To build it, we're going to use [refit](https://github.com/reactiveui/refit), which is a library to easily build type-safe services to interact with REST APIs. As before, we need to define the interface with all the APIs that our service will implement, like so:
 
